@@ -1,7 +1,9 @@
 package server;
 
-import java.io.IOException;
-
 public interface Server {
-    void start() throws IOException;
+    void send(String message);
+
+    void remove(ServerClient client);
+
+    void start();
 }

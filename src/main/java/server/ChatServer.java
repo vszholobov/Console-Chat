@@ -1,55 +1,63 @@
 package server;
 
-import server.client.Client;
-import server.client.Clients;
-import server.client.ServerClient;
-import server.client.ServerClients;
-
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChatServer implements Server {
-    private final int port;
-    private final Clients clients;
+    private final int serverPort;
+    private final Set<ServerClient> clients;
 
-    public ChatServer(int port) {
-        this.port = port;
-        this.clients = new ServerClients();
+    public ChatServer(int portNumber) {
+        this.serverPort = portNumber;
+        this.clients = new HashSet<>();
     }
 
     @Override
-    public void start() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(this.port);
+    public void send(String message) {
+        System.out.println(message);
 
-        System.out.println("Server successfully started on: " + serverSocket.getLocalSocketAddress());
+        for(ServerClient client : clients) {
+            client.send(message);
+        }
+    }
 
+    @Override
+    public void remove(ServerClient client) {
+        this.clients.remove(client);
+    }
+
+    @Override
+    public void start() {
+        ServerSocket serverSocket;
+
+        try {
+            serverSocket = new ServerSocket(serverPort);
+        } catch(IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        System.out.println("SUCCESS: server started");
+        this.acceptClients(serverSocket);
+    }
+
+    private void acceptClients(ServerSocket serverSocket) {
         while(true) {
             try {
-                Socket socket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("SUCCESS: accepted " + clientSocket.getRemoteSocketAddress());
 
-                System.out.println("Accepts: " +
-                        socket.getRemoteSocketAddress() +
-                        System.lineSeparator() +
-                        "Connected ip: " +
-                        socket.getInetAddress());
+                ServerClient client = new ServerClient(this, clientSocket);
+                clients.add(client);
 
-                PrintWriter pw = new PrintWriter(socket.getOutputStream(), false);
-                pw.println("Введите имя: ");
-                pw.flush();
-
-                Scanner in = new Scanner(socket.getInputStream());
-                Client client = new ServerClient(in.nextLine());
-                System.out.println(client.name());
-
-                // ClientThread client = new ClientThread(this, socket);
-                // Thread thread = new Thread(client);
-                // thread.start();
-                // clients.add(client);
-            } catch(IOException ex) {
-                System.out.println("Accept failed on : " + port);
+                Thread thread = new Thread(client);
+                thread.start();
+            } catch(IOException e) {
+                System.out.println("ERROR: could not accept incoming request");
+                e.printStackTrace();
             }
         }
     }
