@@ -1,6 +1,5 @@
-package server.client;
+package server;
 
 public interface Client {
     void send(String message);
-    String name();
 }
