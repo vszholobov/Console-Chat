@@ -27,6 +27,7 @@ public class ChatServer implements Server {
     @Override
     public void remove(ServerClient client) {
         this.clients.remove(client);
+        System.out.println("DISCONNECT: " + client);
     }
 
     @Override
