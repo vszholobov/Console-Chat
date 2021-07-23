@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Scanner;
 
 public class ServerClient implements Runnable, Client {
@@ -26,6 +27,8 @@ public class ServerClient implements Runnable, Client {
     public void run() {
         try {
             Scanner in = new Scanner(socket.getInputStream());
+
+            this.socket.setSoTimeout(1000);
 
             while(!socket.isClosed()) {
                 if(in.hasNextLine()) {
