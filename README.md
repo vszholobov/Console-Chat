@@ -1,3 +1,2 @@
-# Java WebSocket Chat
-Console chat with a server on WebSockets
+# Java WebSocket console chat
 <img src="https://i.ibb.co/vwLfvFQ/chat.png">
